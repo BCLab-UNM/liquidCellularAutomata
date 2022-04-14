@@ -44,7 +44,7 @@ if __name__ == '__main__':
   # Agent list with a list of args per?
 
   # ### Change things here while testing ###
-  args = vars(parser.parse_args(["--agents", "100", "--vis", "--seed", "90"]))
+  args = vars(parser.parse_args())
   # @NOTE we are always visualzing right now
   print(args)
   # args for time(speed), radius, colors, color balance, walk angles/type,rng seed
