@@ -95,7 +95,6 @@ if __name__ == '__main__':
       agent.turt.right(random.randint(args['min_walk_angle'], args['max_walk_angle']))
       agent.turt.forward(random.randint(args['min_walk_distance'], args['max_walk_distance']))
 
-      loop_times = loop_times + 1
       # update agent color value with black outline
       new_consensus = consensus(agent.within_range(agents))
       if agent.turt.color()[1] != new_consensus:
@@ -103,6 +102,7 @@ if __name__ == '__main__':
         if args['bounce']:
           agent.turt.right(180)  # if we changed state then bounce, could use random.randint(160, 200)
     screen.update()
+    loop_times = loop_times + 1
 
   # Print out results from experiment
   turtle.write("Consensus of " + agents[0].turt.color()[1] + " reached\nAfter " + str(loop_times) + " iterations",
