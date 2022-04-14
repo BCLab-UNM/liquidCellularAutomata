@@ -54,7 +54,9 @@ if __name__ == '__main__':
   screen.title("LCA")
   screen.tracer(False)
   half_width = int(screen.window_width() / 2)
+  print(half_width)
   half_height = int(screen.window_height() / 2)
+  print(half_height)
 
   # Config values
   random.seed(args['seed'])
@@ -67,8 +69,9 @@ if __name__ == '__main__':
     agent.turt.penup()
     agent.turt.shape("circle")
     agent.turt.color("black", random.choice(colors))
-    agent.turt.goto(random.randint(-half_width, half_width),
-                    random.randint(-half_height, half_height))
+    x = random.randint(-half_width, half_width)
+    y = random.randint(-half_height, half_height)
+    agent.turt.goto(x,y)
   screen.update()
   print("Starting consensus: ", consensus(agents))
 
@@ -76,6 +79,7 @@ if __name__ == '__main__':
   loop_times = 0
   while not consensus_reached(agents):
     # movement
+    loop_times = loop_times + 1
     for agent in agents:
       # if at edge bounce, @NOTE still can get stuck
       if abs(agent.turt.ycor()) > half_height or abs(agent.turt.xcor()) > half_width:
@@ -86,7 +90,6 @@ if __name__ == '__main__':
       # correlated random walk
       agent.turt.right(random.randint(-45, 45))
       agent.turt.forward(random.randint(5, 10))
-      loop_times = loop_times + 1
       # update agent color value with black outline
       new_consensus = consensus(agent.within_range(agents))
       if agent.turt.color()[1] != new_consensus:
