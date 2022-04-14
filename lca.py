@@ -5,16 +5,20 @@ import time  # for sleep
 import math  # for sqrt
 import argparse
 
-
 class Agent:
-  def __init__(self, node_degree=5):
+  def __init__(self, x=None, y=None, node_degree=5, half_height=100, half_width=100):
+    x = x if x else random.randint(-half_width, half_width)
+    y = y if y else random.randint(-half_height, half_height)
     self.turt = turtle.Turtle()
-    self.seed = None
     self.radius = None
     self.node_degree = node_degree
     self.group_id = 0  # for later clumping into different step timings
     self.duplex = None  # 4 states: does it get influenced or is an influencer
-    self.original_pose = (self.turt.xcor(), self.turt.ycor())
+    self.original_pose = (x, y)
+    self.turt.penup()
+    self.turt.goto(x, y)
+    self.turt.shape("circle")
+    self.turt.color("black", random.choices(args['colors'], weights=args['weights'], k=1)[0])
 
   def within_range(self, agents):
     agents_in_range = []
@@ -28,6 +32,7 @@ class Agent:
 
 
 def consensus(agents):
+  # @TODO double check this is working correctly
   colors = ["white", "black"]
   return max(set(colors), key=[agent.turt.color()[1] for agent in agents].count)
 
@@ -40,10 +45,18 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--agents', type=int, default=256, help='number of agents')
   parser.add_argument('--seed', type=int, default=random.randint(0, 9000), help='rng seed')
+  parser.add_argument('--node_degree', type=int, default=256, help='node degree')
+  parser.add_argument('--radius', type=float, default=20.0, help='node degree')
+  parser.add_argument('--sleep', type=float, default=0.0, help='Step Sleep in seconds')
   parser.add_argument('--vis', action='store_true', help='Enable visualization')  # False default
-  # Agent list with a list of args per?
+  parser.add_argument('--bounce', action='store_true', help='Bounce on state change')  # False default
+  parser.add_argument('-c', '--colors', nargs='+', default=["white", "black"], help='list of colors')
+  parser.add_argument('-w', '--weights', nargs='+', default=[0.6, 0.4], help='list of weights of said colors')
+  parser.add_argument('--min_walk_angle', type=int, default=-45, help='walk step min angle turned')
+  parser.add_argument('--max_walk_angle', type=int, default=45, help='walk step max angle turned')
+  parser.add_argument('--min_walk_distance', type=float, default=5, help='min walk step distance forward')
+  parser.add_argument('--max_walk_distance', type=float, default=10, help='max walk step distance forward')
 
-  # ### Change things here while testing ###
   args = vars(parser.parse_args())
   # @NOTE we are always visualzing right now
   print(args)
@@ -60,18 +73,10 @@ if __name__ == '__main__':
 
   # Config values
   random.seed(args['seed'])
-  radius = 20.0
-  colors = ["white", "black"]
+  radius = args['radius']
 
   # Initialize all of the agents
-  agents = [Agent() for _ in range(args['agents'])]
-  for agent in agents:
-    agent.turt.penup()
-    agent.turt.shape("circle")
-    agent.turt.color("black", random.choice(colors))
-    x = random.randint(-half_width, half_width)
-    y = random.randint(-half_height, half_height)
-    agent.turt.goto(x,y)
+  agents = [Agent(half_width=half_width, half_height=half_height) for _ in range(args['agents'])]
   screen.update()
   print("Starting consensus: ", consensus(agents))
 
@@ -79,7 +84,6 @@ if __name__ == '__main__':
   loop_times = 0
   while not consensus_reached(agents):
     # movement
-    loop_times = loop_times + 1
     for agent in agents:
       # if at edge bounce, @NOTE still can get stuck
       if abs(agent.turt.ycor()) > half_height or abs(agent.turt.xcor()) > half_width:
@@ -88,14 +92,16 @@ if __name__ == '__main__':
         agent.turt.right(random.randint(160, 200))
 
       # correlated random walk
-      agent.turt.right(random.randint(-45, 45))
-      agent.turt.forward(random.randint(5, 10))
+      agent.turt.right(random.randint(args['min_walk_angle'], args['max_walk_angle']))
+      agent.turt.forward(random.randint(args['min_walk_distance'], args['max_walk_distance']))
+
+      loop_times = loop_times + 1
       # update agent color value with black outline
       new_consensus = consensus(agent.within_range(agents))
       if agent.turt.color()[1] != new_consensus:
         agent.turt.color("black", new_consensus)
-        # agent.turt.right(random.randint(160, 200))  # if we changed then bounce
-        agent.turt.right(180)  # if we changed state then bounce
+        if args['bounce']:
+          agent.turt.right(180)  # if we changed state then bounce, could use random.randint(160, 200)
     screen.update()
 
   # Print out results from experiment
