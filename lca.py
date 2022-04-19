@@ -56,6 +56,7 @@ if __name__ == '__main__':
   parser.add_argument('--max_walk_angle', type=int, default=45, help='walk step max angle turned')
   parser.add_argument('--min_walk_distance', type=float, default=5, help='min walk step distance forward')
   parser.add_argument('--max_walk_distance', type=float, default=10, help='max walk step distance forward')
+  parser.add_argument('--output', type=str, default=None, help='output name postfix')
 
   args = vars(parser.parse_args())
   # @NOTE we are always visualzing right now
@@ -81,6 +82,8 @@ if __name__ == '__main__':
   print("Starting consensus: ", consensus(agents, colors))
   print(colors)
   print([[agent.turt.color()[1] for agent in agents].count(color) for color in colors])
+  if args['output']:
+    turtle.getscreen().getcanvas().postscript(file=args['output'] + "_start.eps")
 
   # Main loop
   loop_times = 0
@@ -109,5 +112,7 @@ if __name__ == '__main__':
   # Print out results from experiment
   turtle.write("Consensus of " + agents[0].turt.color()[1] + " reached\nAfter " + str(loop_times) + " iterations",
                move=True, align="center")
+  if args['output']:
+    turtle.getscreen().getcanvas().postscript(file=args['output'] + "_end.eps")
   print("Consensus of", agents[0].turt.color()[1], "reached")
   print("After", str(loop_times), "iterations")
