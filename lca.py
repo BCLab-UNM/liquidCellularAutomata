@@ -33,8 +33,27 @@ class Agent:
     return [agent_in_range[1] for agent_in_range in agents_in_range[:self.node_degree]]
 
 
-def consensus(agents, colors):
-  return max(colors, key=[agent.turt.color()[1] for agent in agents].count)
+def consensus(agents, colors, agent=None):
+  agent_colors = [agent.turt.color()[1] for agent in agents]
+  black_count = 0
+  white_count = 0
+  for color in agent_colors:
+    if color == "black":
+        black_count += 1
+    if color == "white":
+        white_count += 1
+
+  if black_count > white_count:
+    return "black"
+  elif white_count > black_count:
+    return "white"
+  else:
+    if agent:
+        return agent.turt.color()[1]
+    else:
+        return "equal"
+
+  #return max(colors, key=agent_colors.count)
 
 
 def consensus_reached(agents):
@@ -101,7 +120,7 @@ if __name__ == '__main__':
       agent.turt.forward(random.randint(args['min_walk_distance'], args['max_walk_distance']))
 
       # update agent color value with black outline
-      new_consensus = consensus(agent.within_range(agents), colors)
+      new_consensus = consensus(agent.within_range(agents), colors, agent=agent)
       if agent.turt.color()[1] != new_consensus:
         agent.turt.color("black", new_consensus)
         if args['bounce']:
