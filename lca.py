@@ -79,6 +79,8 @@ if __name__ == '__main__':
   agents = [Agent(half_width=half_width, half_height=half_height, args=args) for _ in range(args['agents'])]
   screen.update()
   print("Starting consensus: ", consensus(agents, colors))
+  print(colors)
+  print([[agent.turt.color()[1] for agent in agents].count(color) for color in colors])
 
   # Main loop
   loop_times = 0
@@ -109,4 +111,3 @@ if __name__ == '__main__':
                move=True, align="center")
   print("Consensus of", agents[0].turt.color()[1], "reached")
   print("After", str(loop_times), "iterations")
-  time.sleep(5)
