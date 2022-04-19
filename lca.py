@@ -34,7 +34,7 @@ class Agent:
 
 
 def consensus(agents, colors):
-  return max(set(colors), key=[agent.turt.color()[1] for agent in agents].count)
+  return max(colors, key=[agent.turt.color()[1] for agent in agents].count)
 
 
 def consensus_reached(agents):
