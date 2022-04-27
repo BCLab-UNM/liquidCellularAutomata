@@ -22,7 +22,7 @@ def run_experiment(seed, agents, node_degree, radius):
     
 
     lock.acquire()
-    with open("./results-lock.txt", "a") as f:
+    with open("./results-lock.csv", "a") as f:
         line_to_write = str(seed) + "," + str(agents) + "," + str(node_degree) + "," + str(radius)
         line_to_write += "," + str(consensus) + "," + str(iterations) + "\n"
         f.write(line_to_write) 
@@ -30,7 +30,9 @@ def run_experiment(seed, agents, node_degree, radius):
 
 def main():
 
-    
+    #Make the header
+    with open("./results-lock.csv", "w") as f:
+        f.write("seed,agents,node_degree,radius,consensus\n")
     
     #Create tasks
     tasks = []
