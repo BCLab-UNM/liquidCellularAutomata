@@ -4,6 +4,7 @@ import subprocess
 import multiprocessing
 import logging
 
+#Semaphore to keep track of writing data
 lock = multiprocessing.Lock()
 
 
@@ -12,24 +13,31 @@ def run_experiment(seed, agents, node_degree, radius):
     command_array = command.split(" ")
     print(command)
     output = subprocess.check_output(command_array, encoding='UTF-8')
-    print(type(output))
-    print(output)
+    output_lines = output.split("\n")
+    for line in output_lines:
+        if "reached" in line:
+            consensus = line.split(" ")[2]
+        if "iterations" in line:
+            iterations = line.split(" ")[1]
+    
 
-    lock.aquire()
-    logging.info(output)
+    lock.acquire()
+    with open("./results-lock.txt", "a") as f:
+        line_to_write = str(seed) + "," + str(agents) + "," + str(node_degree) + "," + str(radius)
+        line_to_write += "," + str(consensus) + "," + str(iterations) + "\n"
+        f.write(line_to_write) 
     lock.release()
 
 def main():
 
     
-    fd = open("./results.txt", "w")
     
     #Create tasks
     tasks = []
     for i in range(0,3):
         for b in range(50,100,2):
             for c in range(2,15):
-                for d in range(10,50,2):
+                for d in range(20,50,2):
                     tasks.append((i,b,c,d))
 
     print("Total of " + str(len(tasks)) + " experiments to be run")
@@ -39,7 +47,6 @@ def main():
     p = multiprocessing.Pool(4)
     p.starmap(run_experiment, tasks)
     p.join()
-    fd.close()
 
 if __name__ == "__main__":
     main()
