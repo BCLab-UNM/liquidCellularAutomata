@@ -29,9 +29,8 @@ class Agent:
                        abs(agent.turt.ycor() - o_agent.turt.ycor()) ** 2)
       if dist <= radius:
         agents_in_range.append((dist, o_agent))
-    agents_in_range.sort(key=lambda agent: agent[0])
+    agents_in_range.sort(key=lambda bob: bob[0])
     return [agent_in_range[1] for agent_in_range in agents_in_range[:self.node_degree]]
-
 
 def consensus(agents, colors, agent=None):
   agent_colors = [agent.turt.color()[1] for agent in agents]
@@ -64,7 +63,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--agents', type=int, default=256, help='number of agents')
   parser.add_argument('--seed', type=int, default=random.randint(0, 9000), help='rng seed')
-  parser.add_argument('--node_degree', type=int, default=256, help='node degree')
+  parser.add_argument('--node_degree', type=int, default=2, help='node degree')
   parser.add_argument('--radius', type=float, default=20.0, help='radius of local network')
   parser.add_argument('--sleep', type=float, default=0.0, help='Step Sleep in seconds')
   parser.add_argument('--vis', action='store_true', help='Enable visualization')  # False default
@@ -79,24 +78,27 @@ if __name__ == '__main__':
 
   args = vars(parser.parse_args())
   # @NOTE we are always visualzing right now
-  print(args)
+  #print(args)
   # args for time(speed), radius, colors, color balance, walk angles/type,rng seed
 
   # Initialize turtle environment
   screen = turtle.Screen()
   screen.title("LCA")
   screen.tracer(False)
-  half_width = int(screen.window_width() / 2)
-  print(half_width)
-  half_height = int(screen.window_height() / 2)
-  print(half_height)
+  half_width = 300
+  #half_width = int(screen.window_width() / 2)
+  #print(half_width)
+  half_height = 300
+  #half_height = int(screen.window_height() / 2)
+  #print(half_height)
 
   # Config values
   random.seed(args['seed'])
   radius = args['radius']
   colors = args['colors']
+  degree = args['node_degree']
   # Initialize all of the agents
-  agents = [Agent(half_width=half_width, half_height=half_height, args=args) for _ in range(args['agents'])]
+  agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, args=args) for _ in range(args['agents'])]
   screen.update()
   print("Starting consensus: ", consensus(agents, colors))
   print(colors)
@@ -107,14 +109,31 @@ if __name__ == '__main__':
   # Main loop
   loop_times = 0
   while not consensus_reached(agents):
-    # movement
+    if loop_times > 15000:
+      print("terminated early")  
+      exit()
+      # movement
     for agent in agents:
+
+      if abs(agent.turt.ycor()) > half_height or abs(agent.turt.xcor()) > half_width:  
       # if at edge bounce, @NOTE still can get stuck
-      if abs(agent.turt.ycor()) > half_height or abs(agent.turt.xcor()) > half_width:
-        agent.turt.back(5)  # this should reduce getting stuck at the edge
+        my_x = agent.turt.xcor()
+        my_y = agent.turt.ycor()
+        if abs(agent.turt.ycor()) > half_height:
+          if (agent.turt.ycor() <= 0):
+            my_y = -half_height + 1
+          else:
+            my_y = half_height - 1 
+        if abs(agent.turt.xcor()) > half_width:
+          if (agent.turt.xcor() <= 0):
+            my_x = -half_width + 1
+          else:
+            my_x = half_width - 1
+        # agent.turt.back(args['max_walk_distance']+1)  # this should reduce getting stuck at the edge
+        
         # 180 would perfect bounce but at the corner would be bad could get stuck oscillating
         agent.turt.right(random.randint(160, 200))
-
+        agent.turt.goto(my_x, my_y)
       # correlated random walk
       agent.turt.right(random.randint(args['min_walk_angle'], args['max_walk_angle']))
       agent.turt.forward(random.randint(args['min_walk_distance'], args['max_walk_distance']))

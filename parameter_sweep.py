@@ -32,13 +32,17 @@ def main():
 
     #Make the header
     with open("./results-lock.csv", "w") as f:
-        f.write("seed,agents,node_degree,radius,consensus\n")
+        f.write("seed,agents,node_degree,radius,consensus,iterations\n")
     
     #Create tasks
     tasks = []
-    for i in range(0,3):
+    #for i in range(2,2):
+    for i in range(0,3):    
+        #for b in range(50,100,5):
         for b in range(50,100,2):
-            for c in range(2,15):
+            #for c in range(2,16,2):
+            for c in range(2,16):
+                #for d in range(20,50,5):
                 for d in range(20,50,2):
                     tasks.append((i,b,c,d))
 
