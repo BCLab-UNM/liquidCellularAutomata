@@ -100,6 +100,7 @@ if __name__ == '__main__':
   # Initialize all of the agents
   agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, args=args) for _ in range(args['agents'])]
   screen.update()
+  print("Seed:", args['seed'])
   print("Starting consensus: ", consensus(agents, colors))
   print(colors)
   print([[agent.turt.color()[1] for agent in agents].count(color) for color in colors])
