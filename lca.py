@@ -5,8 +5,9 @@ import time  # for sleep
 import math  # for sqrt
 import argparse
 
+
 class Agent:
-  def __init__(self, x=None, y=None, node_degree=5, half_height=100, half_width=100, args=None):
+  def __init__(self, x=None, y=None, node_degree=5, half_height=100, half_width=100, weights=None, args=None):
     if args is None:
       args = dict()
     x = x if x else random.randint(-half_width, half_width)
@@ -20,7 +21,7 @@ class Agent:
     self.turt.penup()
     self.turt.goto(x, y)
     self.turt.shape("circle")
-    self.turt.color("black", random.choices(args['colors'], weights=args['weights'], k=1)[0])
+    self.turt.color("black", random.choices(args['colors'], weights=weights, k=1)[0])
 
   def within_range(self, agents):
     agents_in_range = []
@@ -30,29 +31,23 @@ class Agent:
       if dist <= radius:
         agents_in_range.append((dist, o_agent))
     agents_in_range.sort(key=lambda bob: bob[0])
-    return [agent_in_range[1] for agent_in_range in agents_in_range[:(self.node_degree+1)]]
+    return [agent_in_range[1] for agent_in_range in agents_in_range[:(self.node_degree + 1)]]
+
 
 def consensus(agents, colors, agent=None):
-  agent_colors = [agent.turt.color()[1] for agent in agents]
-  black_count = 0
-  white_count = 0
-  for color in agent_colors:
-    if color == "black":
-        black_count += 1
-    if color == "white":
-        white_count += 1
-
-  if black_count > white_count:
-    return "black"
-  elif white_count > black_count:
-    return "white"
-  else:
-    if agent:
-        return agent.turt.color()[1]
-    else:
-        return "equal"
-
-  #return max(colors, key=agent_colors.count)
+  agent_colors_count = [[oagent.turt.color()[1] for oagent in agents].count(color) for color in colors]
+  max_colors_count = max(agent_colors_count)
+  max_colors = [colors[index] for index in range(len(colors)) if agent_colors_count[index] == max_colors_count]
+  if agent:
+    # if the turtle's own color is in the max then use that
+    # this will also cover the case where there is a tie
+    if agent.turt.color()[1] in max_colors:
+      return agent.turt.color()[1]
+    else:  # there is a tie of colors that are not the turtle's own color so choose a random one
+      return random.choices(max_colors)
+  if len(max_colors) == 1:
+    return max_colors[0]
+  return "tie: " + str(max_colors)
 
 
 def consensus_reached(agents):
@@ -78,7 +73,7 @@ if __name__ == '__main__':
 
   args = vars(parser.parse_args())
   # @NOTE we are always visualzing right now
-  #print(args)
+  # print(args)
   # args for time(speed), radius, colors, color balance, walk angles/type,rng seed
 
   # Initialize turtle environment
@@ -86,19 +81,21 @@ if __name__ == '__main__':
   screen.title("LCA")
   screen.tracer(False)
   half_width = 300
-  #half_width = int(screen.window_width() / 2)
-  #print(half_width)
+  # half_width = int(screen.window_width() / 2)
+  # print(half_width)
   half_height = 300
-  #half_height = int(screen.window_height() / 2)
-  #print(half_height)
+  # half_height = int(screen.window_height() / 2)
+  # print(half_height)
 
   # Config values
   random.seed(args['seed'])
   radius = args['radius']
   colors = args['colors']
   degree = args['node_degree']
+  weights = [float(weight) for weight in args['weights']]
   # Initialize all of the agents
-  agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, args=args) for _ in range(args['agents'])]
+  agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, weights=weights, args=args) for _
+            in range(args['agents'])]
   screen.update()
   print("Seed:", args['seed'])
   print("Starting consensus: ", consensus(agents, colors))
@@ -112,27 +109,26 @@ if __name__ == '__main__':
     if loop_times % 100 == 0:
       print([[agent.turt.color()[1] for agent in agents].count(color) for color in colors])
     if loop_times > 15000:
-      print("terminated early")  
+      print("terminated early")
       exit()
       # movement
     for agent in agents:
-
-      if abs(agent.turt.ycor()) > half_height or abs(agent.turt.xcor()) > half_width:  
-      # if at edge bounce, @NOTE still can get stuck
+      if abs(agent.turt.ycor()) > half_height or abs(agent.turt.xcor()) > half_width:
+        # if at edge bounce, @NOTE still can get stuck
         my_x = agent.turt.xcor()
         my_y = agent.turt.ycor()
         if abs(agent.turt.ycor()) > half_height:
-          if (agent.turt.ycor() <= 0):
+          if agent.turt.ycor() <= 0:
             my_y = -half_height + 1
           else:
-            my_y = half_height - 1 
+            my_y = half_height - 1
         if abs(agent.turt.xcor()) > half_width:
-          if (agent.turt.xcor() <= 0):
+          if agent.turt.xcor() <= 0:
             my_x = -half_width + 1
           else:
             my_x = half_width - 1
         # agent.turt.back(args['max_walk_distance']+1)  # this should reduce getting stuck at the edge
-        
+
         # 180 would perfect bounce but at the corner would be bad could get stuck oscillating
         agent.turt.right(random.randint(160, 200))
         agent.turt.goto(my_x, my_y)
