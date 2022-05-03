@@ -103,13 +103,14 @@ if __name__ == '__main__':
   print("Seed:", args['seed'])
   print("Starting consensus: ", consensus(agents, colors))
   print(colors)
-  print([[agent.turt.color()[1] for agent in agents].count(color) for color in colors])
   if args['output']:
     turtle.getscreen().getcanvas().postscript(file=args['output'] + "_start.eps")
 
   # Main loop
   loop_times = 0
   while not consensus_reached(agents):
+    if loop_times % 100 == 0:
+      print([[agent.turt.color()[1] for agent in agents].count(color) for color in colors])
     if loop_times > 15000:
       print("terminated early")  
       exit()
