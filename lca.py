@@ -30,7 +30,7 @@ class Agent:
       if dist <= radius:
         agents_in_range.append((dist, o_agent))
     agents_in_range.sort(key=lambda bob: bob[0])
-    return [agent_in_range[1] for agent_in_range in agents_in_range[:self.node_degree]]
+    return [agent_in_range[1] for agent_in_range in agents_in_range[:(self.node_degree+1)]]
 
 def consensus(agents, colors, agent=None):
   agent_colors = [agent.turt.color()[1] for agent in agents]
