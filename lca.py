@@ -72,7 +72,7 @@ if __name__ == '__main__':
   parser.add_argument('--output', type=str, default=None, help='output name postfix')
 
   args = vars(parser.parse_args())
-  # @NOTE we are always visualzing right now
+  # @NOTE we are always opening the window right now
   # print(args)
   # args for time(speed), radius, colors, color balance, walk angles/type,rng seed
 
@@ -96,7 +96,8 @@ if __name__ == '__main__':
   # Initialize all of the agents
   agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, weights=weights, args=args) for _
             in range(args['agents'])]
-  screen.update()
+  if args['vis']:
+    screen.update()
   print("Seed:", args['seed'])
   print("Starting consensus: ", consensus(agents, colors))
   print(colors)
@@ -142,7 +143,8 @@ if __name__ == '__main__':
         agent.turt.color("black", new_consensus)
         if args['bounce']:
           agent.turt.right(180)  # if we changed state then bounce, could use random.randint(160, 200)
-    screen.update()
+    if args['vis']:
+      screen.update()
     loop_times = loop_times + 1
 
   # Print out results from experiment
