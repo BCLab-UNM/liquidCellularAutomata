@@ -51,8 +51,8 @@ def main():
 
 
     #Create multiprocessing pool
-    p = multiprocessing.Pool(4)
-    p.starmap(run_experiment, tasks)
+    with multiprocessing.Pool(multiprocessing.cpu_count()) as p:
+        p.starmap(run_experiment, tasks)
     p.join()
 
 if __name__ == "__main__":
