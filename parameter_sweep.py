@@ -22,8 +22,6 @@ def run_experiment(seed, agents, node_degree, radius):
             iterations = line.split(" ")[1]
         if "Starting consensus:" in line:
             start = line.split(":")[1].strip()
-            if start != consensus:
-                print("disagreement")
 
     lock.acquire()
     with open("./results-lock.csv", "a") as f:
