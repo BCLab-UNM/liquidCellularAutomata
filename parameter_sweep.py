@@ -17,15 +17,18 @@ def run_experiment(seed, agents, node_degree, radius):
     output_lines = output.split("\n")
     for line in output_lines:
         if "reached" in line:
-            consensus = line.split(" ")[2]
+            consensus = line.split(" ")[2].strip()
         if "iterations" in line:
             iterations = line.split(" ")[1]
-    
+        if "Starting consensus:" in line:
+            start = line.split(":")[1].strip()
+            if start != consensus:
+                print("disagreement")
 
     lock.acquire()
     with open("./results-lock.csv", "a") as f:
         line_to_write = str(seed) + "," + str(agents) + "," + str(node_degree) + "," + str(radius)
-        line_to_write += "," + str(consensus) + "," + str(iterations) + "\n"
+        line_to_write += "," + str(consensus) + "," + str(iterations) + "," + str(start) + "\n"
         f.write(line_to_write) 
     lock.release()
 
@@ -33,7 +36,7 @@ def main():
 
     #Make the header
     with open("./results-lock.csv", "w") as f:
-        f.write("seed,agents,node_degree,radius,consensus,iterations\n")
+        f.write("seed,agents,node_degree,radius,consensus,iterations,start\n")
     
     #Create tasks
     tasks = []
