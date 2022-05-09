@@ -39,11 +39,11 @@ def main():
 
   # Create tasks
   tasks = []
-  for seed in range(0, 3):
-    for agents in range(50, 100, 2):
-      for node_degree in range(2, 16):
-        for radius in range(20, 50, 2):
-          tasks.append((seed, agents, node_degree, radius))
+  for seed in range(0, 50):
+    for agents in range(50, 100):
+      for node_degree in range(2, 8):
+        radius = 30
+        tasks.append((seed, agents, node_degree, radius))
 
   print("Total of " + str(len(tasks)) + " experiments to be run")
 
