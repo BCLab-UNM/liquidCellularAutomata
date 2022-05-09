@@ -21,10 +21,14 @@ node_degrees = set(df['node_degree'])
 #Fixed radius to use
 radius = 30
 
-for i in agents:
+for agent_val in agents:
     tmp = []
-    for b in node_degrees:
-        z_point = df.loc[df['agents'] == i].loc[df['node_degree'] == b].loc[df['radius'] == radius]['iterations'].mean()
+    for node_degree_val in node_degrees:
+        fixed_agents = df.loc[df['agents'] == agent_val]
+        fixed_node_degree = fixed_agents.loc[df['node_degree'] == node_degree_val]
+        fixed_radius = fixed_node_degree.loc[df['radius'] == radius]
+        iteration_values = fixed_radius['iterations']
+        z_point = iteration_values.mean()
         tmp.append(z_point)
 
     z_data.append(tmp)
