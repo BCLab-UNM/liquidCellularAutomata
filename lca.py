@@ -140,6 +140,12 @@ def main(args):
   print("After", str(loop_times), "iterations")
 
 
+""" running in repl not in command line
+import lca
+lca.main({'agents': 256, 'seed': 10, 'node_degree': 2, 'radius': 20, 'vis': True, 'bounce': False,
+     'colors': ["white", "black"], 'weights': [0.6, 0.4],
+     'min_walk_angle': -45, 'max_walk_angle': 45, 'min_walk_distance': 5, 'max_walk_distance': 10, 'output': None})
+"""
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--agents', type=int, default=256, help='number of agents')
