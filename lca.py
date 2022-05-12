@@ -7,13 +7,14 @@ import argparse
 
 
 class Agent:
-  def __init__(self, x=None, y=None, node_degree=5, half_height=100, half_width=100, weights=None, args=None):
+  def __init__(self, x=None, y=None, node_degree=5, half_height=100, half_width=100, weights=None, args=None,
+               radius=20.0):
     if args is None:
       args = dict()
     x = x if x else random.randint(-half_width, half_width)
     y = y if y else random.randint(-half_height, half_height)
     self.turt = turtle.Turtle()
-    self.radius = None
+    self.radius = radius
     self.node_degree = node_degree
     self.group_id = 0  # for later clumping into different step timings
     self.duplex = None  # 4 states: does it get influenced or is an influencer
@@ -26,9 +27,9 @@ class Agent:
   def within_range(self, agents):
     agents_in_range = []
     for o_agent in agents:
-      dist = math.sqrt(abs(agent.turt.xcor() - o_agent.turt.xcor()) ** 2 +
-                       abs(agent.turt.ycor() - o_agent.turt.ycor()) ** 2)
-      if dist <= radius:
+      dist = math.sqrt(abs(self.turt.xcor() - o_agent.turt.xcor()) ** 2 +
+                       abs(self.turt.ycor() - o_agent.turt.ycor()) ** 2)
+      if dist <= self.radius:
         agents_in_range.append((dist, o_agent))
     agents_in_range.sort(key=lambda bob: bob[0])
     return [agent_in_range[1] for agent_in_range in agents_in_range[:(self.node_degree + 1)]]
@@ -54,24 +55,7 @@ def consensus_reached(agents):
   return not any([not (agents[0].turt.color()[1] == agent.turt.color()[1]) for agent in agents])
 
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--agents', type=int, default=256, help='number of agents')
-  parser.add_argument('--seed', type=int, default=random.randint(0, 9000), help='rng seed')
-  parser.add_argument('--node_degree', type=int, default=2, help='node degree')
-  parser.add_argument('--radius', type=float, default=20.0, help='radius of local network')
-  parser.add_argument('--sleep', type=float, default=0.0, help='Step Sleep in seconds')
-  parser.add_argument('--vis', action='store_true', help='Enable visualization')  # False default
-  parser.add_argument('--bounce', action='store_true', help='Bounce on state change')  # False default
-  parser.add_argument('-c', '--colors', nargs='+', default=["white", "black"], help='list of colors')
-  parser.add_argument('-w', '--weights', nargs='+', default=[0.6, 0.4], help='list of weights of said colors')
-  parser.add_argument('--min_walk_angle', type=int, default=-45, help='walk step min angle turned')
-  parser.add_argument('--max_walk_angle', type=int, default=45, help='walk step max angle turned')
-  parser.add_argument('--min_walk_distance', type=float, default=5, help='min walk step distance forward')
-  parser.add_argument('--max_walk_distance', type=float, default=10, help='max walk step distance forward')
-  parser.add_argument('--output', type=str, default=None, help='output name postfix')
-
-  args = vars(parser.parse_args())
+def main(args):
   # @NOTE we are always opening the window right now
   # print(args)
   # args for time(speed), radius, colors, color balance, walk angles/type,rng seed
@@ -94,8 +78,8 @@ if __name__ == '__main__':
   degree = args['node_degree']
   weights = [float(weight) for weight in args['weights']]
   # Initialize all of the agents
-  agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, weights=weights, args=args) for _
-            in range(args['agents'])]
+  agents = [Agent(half_width=half_width, half_height=half_height, node_degree=degree, weights=weights, args=args,
+                  radius=radius) for _ in range(args['agents'])]
   if args['vis']:
     screen.update()
   print("Seed:", args['seed'])
@@ -154,3 +138,22 @@ if __name__ == '__main__':
     turtle.getscreen().getcanvas().postscript(file=args['output'] + "_end.eps")
   print("Consensus of", agents[0].turt.color()[1], "reached")
   print("After", str(loop_times), "iterations")
+
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--agents', type=int, default=256, help='number of agents')
+  parser.add_argument('--seed', type=int, default=random.randint(0, 9000), help='rng seed')
+  parser.add_argument('--node_degree', type=int, default=2, help='node degree')
+  parser.add_argument('--radius', type=float, default=20.0, help='radius of local network')
+  parser.add_argument('--sleep', type=float, default=0.0, help='Step Sleep in seconds')
+  parser.add_argument('--vis', action='store_true', help='Enable visualization')  # False default
+  parser.add_argument('--bounce', action='store_true', help='Bounce on state change')  # False default
+  parser.add_argument('-c', '--colors', nargs='+', default=["white", "black"], help='list of colors')
+  parser.add_argument('-w', '--weights', nargs='+', default=[0.6, 0.4], help='list of weights of said colors')
+  parser.add_argument('--min_walk_angle', type=int, default=-45, help='walk step min angle turned')
+  parser.add_argument('--max_walk_angle', type=int, default=45, help='walk step max angle turned')
+  parser.add_argument('--min_walk_distance', type=float, default=5, help='min walk step distance forward')
+  parser.add_argument('--max_walk_distance', type=float, default=10, help='max walk step distance forward')
+  parser.add_argument('--output', type=str, default=None, help='output name postfix')
+  main(vars(parser.parse_args()))
