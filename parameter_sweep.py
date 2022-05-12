@@ -2,37 +2,15 @@
 import random
 import subprocess
 import multiprocessing
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import lca
 # Semaphore to keep track of writing data
 import sys
+import threading
+from multiprocessing.pool import ThreadPool
 
 lock = multiprocessing.Lock()
-
-
-def run_experiment(seed, agents, node_degree, radius):
-  command = "python3 lca.py --seed " + str(seed) + " --agents " + str(agents) + " --node_degree " + str(
-    node_degree) + " --radius " + str(radius)
-  command_array = command.split(" ")
-  print(command)
-  output = subprocess.check_output(command_array, encoding='UTF-8')
-  output_lines = output.split("\n")
-  consensus = ""
-  iterations = ""
-  start = ""
-  for line in output_lines:
-    if "reached" in line:
-      consensus = line.split(" ")[2].strip()
-    if "iterations" in line:
-      iterations = line.split(" ")[1]
-    if "Starting consensus:" in line:
-      start = line.split(":")[1].strip()
-
-  lock.acquire()
-  with open("./results-lock.csv", "a") as f:
-    line_to_write = str(seed) + "," + str(agents) + "," + str(node_degree) + "," + str(radius)
-    line_to_write += "," + str(consensus) + "," + str(iterations) + "," + str(start) + "\n"
-    f.write(line_to_write)
-  lock.release()
 
 
 def main():
@@ -46,15 +24,26 @@ def main():
     for agents in range(50, 100, 2):
       for node_degree in range(2, 16):
         for radius in range(20, 50, 2):
-          tasks.append((seed, agents, node_degree, radius))
+          tasks.append(threading.Thread(target=lca.main({'agents': agents, 'seed': seed, 'node_degree': node_degree,
+                                                         'radius': radius,
+                                    'vis': True, 'bounce': False, 'colors': ["white", "black"], 'weights': [0.6, 0.4],
+                                    'min_walk_angle': -45, 'max_walk_angle': 45, 'min_walk_distance': 5,
+                                    'max_walk_distance': 10, 'output': None})))
 
   print("Total of " + str(len(tasks)) + " experiments to be run")
 
-  # Create multiprocessing pool
-  with multiprocessing.Pool(multiprocessing.cpu_count()) as p:
-    p.starmap(run_experiment, tasks)
-  p.join()
-
+  with ThreadPoolExecutor(multiprocessing.cpu_count()) as executor:
+    futures = [executor.submit(task) for task in tasks]
+    for future in as_completed(futures):
+      print(future.result())
+      """
+      lock.acquire()
+      with open("./results-lock.csv", "a") as f:
+        line_to_write = str(seed) + "," + str(agents) + "," + str(node_degree) + "," + str(radius)
+        line_to_write += "," + str(consensus) + "," + str(iterations) + "," + str(start) + "\n"
+        f.write(line_to_write)
+      lock.release()
+      """
 
 if __name__ == "__main__":
   sweep_seed = random.randrange(sys.maxsize)
