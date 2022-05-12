@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+import random
 import subprocess
 import multiprocessing
 
 # Semaphore to keep track of writing data
+import sys
+
 lock = multiprocessing.Lock()
 
 
@@ -39,7 +42,7 @@ def main():
 
   # Create tasks
   tasks = []
-  for seed in range(0, 3):
+  for seed in random.sample(range(sys.maxsize), k=3):
     for agents in range(50, 100, 2):
       for node_degree in range(2, 16):
         for radius in range(20, 50, 2):
@@ -54,4 +57,7 @@ def main():
 
 
 if __name__ == "__main__":
+  sweep_seed = random.randrange(sys.maxsize)
+  random.Random(sweep_seed)
+  print("Sweep seed:", sweep_seed)
   main()
