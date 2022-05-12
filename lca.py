@@ -138,6 +138,7 @@ def main(args):
     turtle.getscreen().getcanvas().postscript(file=args['output'] + "_end.eps")
   print("Consensus of", agents[0].turt.color()[1], "reached")
   print("After", str(loop_times), "iterations")
+  return {'start': 1, 'end': 2, 'iterations': loop_times}
 
 
 """ running in repl not in command line
