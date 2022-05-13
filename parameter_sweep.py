@@ -42,11 +42,11 @@ def main():
 
   # Create tasks
   tasks = []
-  for seed in random.sample(range(sys.maxsize), k=3):
-    for agents in range(50, 100, 2):
-      for node_degree in range(2, 16):
-        for radius in range(20, 50, 2):
-          tasks.append((seed, agents, node_degree, radius))
+  for seed in random.sample(range(sys.maxsize), k=100):
+    for agents in range(50, 110, 2):
+      for node_degree in range(2, 15):
+        radius = 999
+        tasks.append((seed, agents, node_degree, radius))
 
   print("Total of " + str(len(tasks)) + " experiments to be run")
 
